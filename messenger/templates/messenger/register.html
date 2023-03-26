@@ -1,0 +1,43 @@
+{% extends 'messenger/layout.html' %}
+
+{% block body %}
+<form method="POST" class="login-register-form" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="container">
+        <p>Already have an account? <a href="{% url 'login' %}">Log in</a>.</p>
+        {% if message %}
+        <p>{{ message }}</p>
+        {% endif %}
+        {% csrf_token %}
+        <div class="row">
+            <div class="input-group col mb-3">
+                <span class="input-group-text" id="username-addon">Username</span>
+                <input type="text" class="form-control" aria-describedby="username-addon" id="usernameRegister"
+                    name="usernameRegister" required>
+            </div>
+            <div class="input-group col mb-3">
+                <span class="input-group-text" id="email-addon">Email</span>
+                <input type="email" aria-describedby="email-addon" class="form-control" id="emailRegister"
+                    name="emailRegister" required>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-group col mb-3">
+                <span class="input-group-text" id="password-addon">Password</span>
+                <input type="password" aria-describedby="password-addon" class="form-control" id="passwordRegister"
+                    name="passwordRegister" required>
+            </div>
+            <div class="input-group col mb-3">
+                <span class="input-group-text" id="confirmpassword-addon">Confirm password</span>
+                <input type="password" aria-describedby="confirmpassword-addon" class="form-control"
+                    id="confirmationPassword" name="confirmationPassword" required>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="avatarRegister" class="form-label">Your avatar</label>
+            <input type="file" accept="{{imageExtensions}}" class="form-control" id="avatarRegister" name="avatarRegister" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Register</button>
+    </div>
+</form>
+{% endblock %}

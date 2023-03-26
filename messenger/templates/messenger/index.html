@@ -1,0 +1,205 @@
+{% extends 'messenger/layout.html' %}
+{% load replaceImgUrl %}
+
+{% block body %}
+<div class="container-fluid row" id="mainblock">
+    <div class="col-md-3 col-lg-2" id="chat-block">
+        <div id="chats">
+            {% for chat in userChats %}
+            <div class="chat" data-link="{{chat.link}}">
+                <div class="chat-contents">
+                    <img class="chat-avatar avatar" src="{{ chat.avatar|replaceImgUrl }}" alt="Server avatar" />
+                    <h2 class="chat-name">{{chat.name}}</h2>
+                </div>
+                {% if request.user == chat.createdby %}
+                <div class="chatactions">
+                    <div class="chatactions-icon dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                            <path
+                                d="M0 256a56 56 0 1 1 112 0A56 56 0 1 1 0 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z" />
+                        </svg>
+                    </div>
+                    <ul class="dropdown-menu chatedit-dropdown">
+                        <li>
+                            <a class="dropdown-item editchat" data-name="{{chat.name}}" data-link="{{chat.link}}"
+                                data-bs-toggle="modal" data-bs-target="#editchat-modal">
+                                <svg class="chatedit-dropdownsvg" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 512 512">
+                                    <path
+                                        d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z" />
+                                </svg>
+                                <span class="chatedit-dropdowntext">Edit chat</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item deletechat" data-name="{{chat.name}}" data-link="{{chat.link}}"
+                                data-bs-toggle="modal" data-bs-target="#deletechat-modal">
+                                <svg class="chatedit-dropdownsvg" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 448 512">
+                                    <path
+                                        d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z" />
+                                </svg>
+                                <span class="chatedit-dropdowntext">Delete chat</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p id="nochatsmessage">You don't have any chats! Your options are:</p>
+            {% endfor %}
+        </div>
+        <div id="chat-buttons">
+            <button type="button" class="btn btn-primary chat-button" id="chat-join" data-bs-toggle="modal"
+                data-bs-target="#joinchat-modal">Join a chat</button>
+            <button type="button" class="btn btn-primary chat-button" id="chat-create" data-bs-toggle="modal"
+                data-bs-target="#createchat-modal">Create a chat</button>
+        </div>
+    </div>
+    <div class="col" id="message-block">
+        <div id="nochats-txt">Click on a chat to start messaging</div>
+        <div id="invitation-link">
+            <p>Invite your friends: invite/<span id="chat-invite"></span></p>
+        </div>
+        <div id="chat-content" class="col">
+            <div id="chat-content-2">
+                <div id="messages">
+
+                </div>
+                <div id="message-input">
+                    <form id="message-input-form" method="POST">
+                        <input autocomplete="off" data-id class="form-control" id="message-input-field" type="text"
+                            placeholder="Write your message" data-bs-container="body" data-bs-trigger="manual"
+                            data-bs-toggle="popover" data-bs-placement="top"
+                            data-bs-content="Message text can't be longer than 2048 characters">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-lg-2" id="user-block">
+        <div id="users">
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="joinchat-modal" tabindex="-1"
+    aria-labelledby="joinchat-modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="joinchat-label">Join a chat</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="joinchat-input" class="form-label">Chat invitation link</label>
+                    <input type="text" class="form-control" id="joinchat-input" placeholder="invite/1a2bc45" required
+                        data-bs-container="body" data-bs-trigger="manual" data-bs-toggle="popover"
+                        data-bs-placement="right" data-bs-content="Please specify the chat invitation link">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="joinchat-join">Join</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="createchat-modal" tabindex="-1"
+    aria-labelledby="createchat-modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="createchat-label">Create a chat</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3" id="createchat-chatname-popover" data-bs-container="body" data-bs-trigger="manual"
+                        data-bs-toggle="popover" data-bs-placement="right"
+                        data-bs-content="Please specify the chat's name">
+                        <label for="createchat-chatname" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="createchat-chatname" required maxlength="32">
+                    </div>
+                    <div class="mb-3" id="createchat-avatar-popover" data-bs-container="body" data-bs-trigger="manual"
+                        data-bs-toggle="popover" data-bs-placement="right"
+                        data-bs-content="Please specify the chat's avatar">
+                        <label for="createchat-avatar" class="form-label">Avatar</label>
+                        <input type="file" accept="{{imageExtensions}}" class="form-control" id="createchat-avatar"
+                            required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="createchat-create">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="deletechat-modal" tabindex="-1"
+    aria-labelledby="deletechat-modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="deletechat-label">You sure?</h1>
+                <button type="button" class="btn-close deletechat-back" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="deletechat-content">
+                Are you sure you want to delete your chat <span id="deletechat-chatname"></span>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="deletechat-back btn btn-secondary"
+                    data-bs-dismiss="modal">Back!</button>
+                <button type="button" id="deletechat-delete" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="editchat-modal" tabindex="-1"
+    aria-labelledby="editchat-modal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="editchat-label">Edit chat <span id="editchat-chatname"></span></h1>
+                <button type="button" class="btn-close editchat-back" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body" id="editchat-content">
+                    <div class="mb-3">
+                        <label for="editchat-avatar" class="form-label">Avatar</label>
+                        <input class="form-control" type="file" id="editchat-avatar" accept="{{imageExtensions}}">
+                    </div>
+                    <div class="input-group mb-3" id="editchat-namepopover" data-bs-container="body"
+                        data-bs-trigger="manual" data-bs-toggle="popover" data-bs-placement="right"
+                        data-bs-content="Please enter new chat name">
+                        <span class="input-group-text" id="editchat-name-addon">Chat name</span>
+                        <input type="text" id="editchat-name" class="form-control" placeholder="Name"
+                            aria-label="Name" aria-describedby="editchat-name-addon">
+                    </div>
+                </div>
+
+                <div class="modal-footer modal-footer-customflex">
+                    <div class="modal-footer-leftelem">
+                    </div>
+                    <div class="modal-footer-buttons">
+                        <button type="button" class="btn btn-secondary editchat-back"
+                            data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="editchat-edit">Save changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

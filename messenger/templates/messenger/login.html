@@ -1,0 +1,22 @@
+{% extends 'messenger/layout.html' %}
+
+{% block body %}
+<form method="POST" class="login-register-form">
+    {% csrf_token %}
+    <div class="container">
+        <p>Do not have an account? <a href="{% url 'register' %}">Register</a>.</p>
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+        <div class="mb-3">
+            <label for="usernameLogin" class="form-label">Username</label>
+            <input type="text" class="form-control" id="usernameLogin" name="usernameLogin" required>
+        </div>
+        <div class="mb-3">
+            <label for="passwordLogin" class="form-label">Password</label>
+            <input type="password" class="form-control" id="passwordLogin" name="passwordLogin" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Log in</button>
+    </div>
+</form>
+{% endblock %}
