@@ -5,6 +5,8 @@ It looks like any other online messenger, where you can join chats and talk to p
 
 ![Jester design](https://i.imgur.com/e2jSIA0.png)
 
+#### Video demo: [link](https://www.youtube.com/watch?v=X84m8JKvRjQ)
+
 ## How to run the application
 In the main directory:
 ```bash
