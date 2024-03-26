@@ -7,12 +7,6 @@ It looks like any other online messenger, where you can join chats and talk to p
 
 #### Video demo: [link](https://www.youtube.com/watch?v=X84m8JKvRjQ)
 
-## How to run the application
-In the main directory:
-```bash
-python manage.py runserver
-```
-
 ## Distinctiveness and complexity
 The application uses websockets, which is the main reason why this project was harder than I originally expected. Their point is to automatically update all the changes that have been made to the page for all other users, without the need to reload it.
 

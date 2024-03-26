@@ -19,6 +19,7 @@ from .models import User, Chat, Message
 
 # initialize global vars
 globalvars.init()
+fss = FileSystemStorage()
 
 def nullUndefToNone(value):
     return None if (value == 'null' or value == 'undefined') else value
@@ -38,25 +39,16 @@ def editAvatar(chatUserObj, avatarObj, isUser):
     chatUserObj.avatar.name = avatarPath
     return avatarPath
 
-
-fss = FileSystemStorage()
-
-# Create your views here.
-
+def nojs(request):
+    return render(request, "messenger/nojs.html")
 
 @login_required(login_url='/login')
 def index(request):
-    #print(consumers.MessengerConsumer.chatUpdate())
     return render(request, 'messenger/index.html', {
         "userChats": request.user.chats.all(),
         # ^ chats for the current user
         "imageExtensions": 'image/' + ", image/".join(globalvars.allowedAvatarExtensions),
     })
-
-
-def nojs(request):
-    return render(request, "messenger/nojs.html")
-
 
 @csrf_exempt
 @login_required(login_url='/login')

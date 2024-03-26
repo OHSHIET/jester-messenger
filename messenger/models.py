@@ -1,8 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-# Create your models here.
-
 class Chat(models.Model):
     createdby = models.ForeignKey('User', blank=False, on_delete=models.SET_NULL, null=True, related_name="createdchats")
     users = models.ManyToManyField('User', blank=False)
