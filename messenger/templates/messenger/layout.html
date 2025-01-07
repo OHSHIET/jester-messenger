@@ -38,7 +38,7 @@
                 </div>
                 {% if request.user.is_authenticated %}
                 <div id="user-navbar" data-bs-toggle="modal" data-bs-target="#edituser-modal">
-                    <img src="media/{{ request.user.avatar }}" alt="User avatar" class="avatar" id="user-avatar"
+                    <img src="{{ request.user.avatar }}" alt="User avatar" class="avatar" id="user-avatar"
                         data-id="{{ request.user.id }}" />
                     <span id="main-username" class="all-usernames" data-id="{{request.user.id}}">{{request.user.username}}</span>
                 </div>

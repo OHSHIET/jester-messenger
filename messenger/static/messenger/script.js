@@ -30,7 +30,7 @@ function errorDeletingEditingChat(msg, elemLabel, elemContent) {
 function addUser(avatar, name, id) {
     return `
         <div class="user">
-            <img class="avatar listuser-avatar" data-id="${id}" src="media/${avatar}" alt="User avatar" />
+            <img class="avatar listuser-avatar" data-id="${id}" src="${avatar}" alt="User avatar" />
             <div class="user-username all-usernames" data-id=${id}>
                 ${name}
             </div>
@@ -42,7 +42,7 @@ function postNewMessage(mainMsgClass, msgContinued, username, txt, date, avatar,
     return `
     <div class="msg ${mainMsgClass}">
         <div class="msg-avatar" style="${(msgContinued) ? 'visibility: hidden;' : ""}">
-            <img class="avatar msg-avatar-pic" data-id="${id}" src="media/${avatar}" alt="User avatar" />
+            <img class="avatar msg-avatar-pic" data-id="${id}" src="${avatar}" alt="User avatar" />
         </div>
         <div class="msg-content">
             <div class="msg-author all-usernames" data-id="${id}" style="${(msgContinued) ? 'display: none;' : ""}">${username}</div>
