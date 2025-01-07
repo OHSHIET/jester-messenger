@@ -7,6 +7,10 @@ It looks like any other online messenger, where you can join chats and talk to p
 
 #### Video demo: [link](https://www.youtube.com/watch?v=X84m8JKvRjQ)
 
+### January 2025 update
+* Moved all the avatars to media folder.
+* Fixed the issue with websockets, now it shows the loading screen if there was a disconnection and attempts to reconnect properly.
+
 ## Distinctiveness and complexity
 The application uses websockets, which is the main reason why this project was harder than I originally expected. Their point is to automatically update all the changes that have been made to the page for all other users, without the need to reload it.
 
@@ -43,7 +47,7 @@ My only excuse is that I wanted to move with other projects and not waste too mu
 * `messenger/views.py` - mostly all the backend.
 * `<static>/script.js` - all the frontend.
 * `<static>/style.css`, `<static>/style.scss`, `<static>/style.css.map` - CSS + SCSS design.
-* `<static>/serveravatars`, `<static>/useravatars` - folders for storing user and server avatars.
+* `media/serveravatars`, `media/useravatars` - folders for storing user and server avatars. It doesn't exist on GitHub, but it'll get created once you create a user or a server.
 * `messenger/templates/messenger/*` - HTML templates for Django to render pages.
 * `messenger/templatetags` - because I forgot static exists, I created this template tag for trimming the URL.
 * `messenger/globalvars.py` - global variables for backend.
