@@ -5,13 +5,13 @@ class Chat(models.Model):
     createdby = models.ForeignKey('User', blank=False, on_delete=models.SET_NULL, null=True, related_name="createdchats")
     users = models.ManyToManyField('User', blank=False)
     messages = models.ManyToManyField('Message', blank=True)
-    avatar = models.ImageField(upload_to='messenger/static/messenger/serveravatars', default=None)
+    avatar = models.ImageField(upload_to='serveravatars', default=None)
     name = models.CharField(max_length=32, default='Chat name')
     link = models.TextField(max_length=128, default=None, null=True, unique=True)
 
 class User(AbstractUser):
     chats = models.ManyToManyField(Chat, blank=True)
-    avatar = models.ImageField(upload_to='messenger/static/messenger/useravatars', default=None, null=True, blank=False)
+    avatar = models.ImageField(upload_to='useravatars', default=None, null=True, blank=False)
 
     def serialize(self):
         return {

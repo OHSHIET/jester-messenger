@@ -30,7 +30,7 @@ function errorDeletingEditingChat(msg, elemLabel, elemContent) {
 function addUser(avatar, name, id) {
     return `
         <div class="user">
-            <img class="avatar listuser-avatar" data-id="${id}" src="${avatar}" alt="User avatar" />
+            <img class="avatar listuser-avatar" data-id="${id}" src="media/${avatar}" alt="User avatar" />
             <div class="user-username all-usernames" data-id=${id}>
                 ${name}
             </div>
@@ -42,7 +42,7 @@ function postNewMessage(mainMsgClass, msgContinued, username, txt, date, avatar,
     return `
     <div class="msg ${mainMsgClass}">
         <div class="msg-avatar" style="${(msgContinued) ? 'visibility: hidden;' : ""}">
-            <img class="avatar msg-avatar-pic" data-id="${id}" src="${replaceAvatarPath(avatar)}" alt="User avatar" />
+            <img class="avatar msg-avatar-pic" data-id="${id}" src="media/${avatar}" alt="User avatar" />
         </div>
         <div class="msg-content">
             <div class="msg-author all-usernames" data-id="${id}" style="${(msgContinued) ? 'display: none;' : ""}">${username}</div>
@@ -150,7 +150,7 @@ function moveToChat(chat) {
                             let msgsLen = dataMsg.messages.length;
                             msgsAmount += msgsLen;
 
-                            if (dataMsg.messages[0].author.name === $('.msg .msg-author').eq(0).text()) {
+                            if (dataMsg.messages[0]?.author?.name === $('.msg .msg-author').eq(0).text()) {
                                 $('.msg .msg-author').eq(0).css('display', 'none');
                                 $('.msg .msg-avatar').eq(0).css('visibility', 'hidden');
                             }
@@ -247,104 +247,129 @@ $(document).ready(function () {
     const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
     const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
 
+    let websocket;
+    let keepConnection;
+
     const base_url = `${window.location.hostname}:${window.location.port}`;
-    const websocket = new WebSocket(`ws://${base_url}`);
+    websocket = new WebSocket(`ws://${base_url}`);
 
-    // open connection
-    websocket.onopen = function (event) {
-        console.log('Connected to server');
+    function connectWebSocket() {
+        websocket = new WebSocket(`ws://${base_url}`);
+    
+        websocket.onopen = function (event) {
+            dotLoaderFader();
+            console.log('Connected to server');
+    
+            // Send pings every 55 seconds to keep the connection alive
+            keepConnection = setInterval(function () {
+                if (websocket.readyState === WebSocket.OPEN) {
+                    websocket.send('{"message":"ping"}');
+                }
+            }, 55000);
+        };
+    
+        websocket.onerror = function (event) {
+            console.error('WebSocket error:', event);
+        };
+    
+        websocket.onclose = function (event) {
+            dotLoader();
 
-        let keepConnection = setInterval(function () {
-            if (websocket.readyState != 1) {
-                clearInterval(keepConnection);
-                return;
+            console.log('Connection closed. Reconnecting in 5 seconds...');
+            clearInterval(keepConnection);
+    
+            setTimeout(connectWebSocket, 5000);
+        };
+
+        // handle page changes for other users
+        websocket.onmessage = function (event) {
+            let data = JSON.parse(event.data).message;
+            let chat = `.chat[data-link="${data?.link}"]`;
+            console.log("Server message received: ", data);
+            if (data.message === "Server change" && $(chat).length) {
+                if (data.change === 'update') {
+                    if (data.avatar) {
+                        $(`${chat} .chat-avatar`).attr('src',
+                            data.avatar + '?t=' + new Date().getTime());
+                    }
+                    if (data.name) {
+                        $(`${chat} .chat-name`).text(data.name);
+                        $(`${chat} .dropdown-item.editchat`).attr('data-name', data.name);
+                    }
+                }
+                else if (data.change === 'delete') {
+                    if (currentChat === data.link) {
+                        $('#user-block, #invitation-link').css('display', 'none');
+                        $('#nochats-txt').css('display', 'block');
+                        $('#chat-content').css('display', 'none');
+                        $('#message-block').css({
+                            display: 'flex',
+                            justifyContent: 'center',
+                            flexDirection: 'column',
+                        })
+                        $('#message-block').removeClass('row');
+                        currentChat = null;
+                    }
+                    $(chat).remove();
+                }
             }
-            websocket.send('{"message":"ping"}');
-        }, 55000);
-    }
-
-
-    // handle page changes for other users
-    websocket.onmessage = function (event) {
-        let data = JSON.parse(event.data).message;
-        let chat = `.chat[data-link="${data?.link}"]`;
-        console.log("Server message received: ", data);
-        if (data.message === "Server change" && $(chat).length) {
-            if (data.change === 'update') {
+            else if (data.message === 'Join server') {
+                if (data.id != $('#main-username').attr('data-id'))
+                    $('#user-block #users').append(addUser(data.avatar, data.name, data.id));
+            }
+            else if (data.message === 'Edit user') {
                 if (data.avatar) {
-                    $(`${chat} .chat-avatar`).attr('src',
-                        data.avatar + '?t=' + new Date().getTime());
+                    $(`img[data-id="${data.id}"]`).attr('src', data.avatar + '?t=' + new Date().getTime());
                 }
                 if (data.name) {
-                    $(`${chat} .chat-name`).text(data.name);
-                    $(`${chat} .dropdown-item.editchat`).attr('data-name', data.name);
+                    $(`.all-usernames[data-id="${data.id}"]`).text(data.name);
                 }
             }
-            else if (data.change === 'delete') {
+
+            else if (data.message === 'New message') {
                 if (currentChat === data.link) {
-                    $('#user-block, #invitation-link').css('display', 'none');
-                    $('#nochats-txt').css('display', 'block');
-                    $('#chat-content').css('display', 'none');
-                    $('#message-block').css({
-                        display: 'flex',
-                        justifyContent: 'center',
-                        flexDirection: 'column',
-                    })
-                    $('#message-block').removeClass('row');
-                    currentChat = null;
+                    msgContinued = ($('#messages').children().length > 0 && data.name === $('#messages .msg:last-child .msg-author').text());
+
+                    $('#messages').append(postNewMessage(
+                        ($('#main-username').attr('data-id') == data.id) ? "msg-right" : "msg-left",
+                        msgContinued,
+                        data.name,
+                        data.txt,
+                        data.date,
+                        data.avatar,
+                        data.id,
+                    ));
+
+                    msgsAmount++;
+
+                    let moveToBottom = document.getElementById('messages');
+                    moveToBottom.scrollTop = moveToBottom.scrollHeight;
                 }
-                $(chat).remove();
+                else if (!$(chat).hasClass('new-messages')) {
+                    $(chat).addClass('new-messages');
+                }
             }
-        }
-        else if (data.message === 'Join server') {
-            if (data.id != $('#main-username').attr('data-id'))
-                $('#user-block #users').append(addUser(data.avatar, data.name, data.id));
-        }
-        else if (data.message === 'Edit user') {
-            if (data.avatar) {
-                $(`img[data-id="${data.id}"]`).attr('src', data.avatar + '?t=' + new Date().getTime());
-            }
-            if (data.name) {
-                $(`.all-usernames[data-id="${data.id}"]`).text(data.name);
-            }
+
         }
 
-        else if (data.message === 'New message') {
-            if (currentChat === data.link) {
-                msgContinued = ($('#messages').children().length > 0 && data.name === $('#messages .msg:last-child .msg-author').text());
-
-                $('#messages').append(postNewMessage(
-                    ($('#main-username').attr('data-id') == data.id) ? "msg-right" : "msg-left",
-                    msgContinued,
-                    data.name,
-                    data.txt,
-                    data.date,
-                    data.avatar,
-                    data.id,
-                ));
-
-                msgsAmount++;
-
-                let moveToBottom = document.getElementById('messages');
-                moveToBottom.scrollTop = moveToBottom.scrollHeight;
-            }
-            else if (!$(chat).hasClass('new-messages')) {
-                $(chat).addClass('new-messages');
-            }
-        }
-
+        
+    
     }
+
+    connectWebSocket();
 
 
     let dotCounter = 0;
 
-    // do the stuff before loading the chats
-    let onload = new Promise((resolve) => {
+    window.dotsInterval = null;
 
-        if($('.login-register-form').length){
-            document.getElementById('nav-open-chats').style.setProperty('display', 'none', 'important');
-            document.getElementById('nav-name').style.setProperty('display', 'block', 'important');
-        }
+    function dotLoader(){
+        $('#everything').fadeOut(350).promise().then(() => {
+            $('body').css({
+                display: 'flex',
+            })
+            $('#loader').fadeIn(250)
+        });
 
         dotsInterval = setInterval(function(){
             $('#loader-dots > div').eq(dotCounter).animate({
@@ -356,6 +381,28 @@ $(document).ready(function () {
             });
             dotCounter = (dotCounter === 2) ? 0 : dotCounter + 1;
         }, 375);
+    }
+
+    function dotLoaderFader(){
+        $('#loader').fadeOut(250).promise().then(() => {
+            $('#everything').fadeIn(500).promise()
+        }).then(() => {
+            $('body').css({
+                display: 'block',
+            })
+            clearInterval(dotsInterval);
+        })
+    }
+
+    // do the stuff before loading the chats
+    let onload = new Promise((resolve) => {
+
+        if($('.login-register-form').length){
+            document.getElementById('nav-open-chats').style.setProperty('display', 'none', 'important');
+            document.getElementById('nav-name').style.setProperty('display', 'block', 'important');
+        }
+
+        dotLoader();
 
        setTimeout(() => {
             return resolve();
@@ -366,14 +413,7 @@ $(document).ready(function () {
 
     onload.then(() => {
 
-        $('#loader').fadeOut(250).promise().then(() => {
-            $('#everything').fadeIn(500).promise()
-        }).then(() => {
-            $('body').css({
-                display: 'block',
-            })
-            clearInterval(dotsInterval);
-        })
+        dotLoaderFader();
 
         $("#edituser-setnewpassword").change(function () {
             if (!this.checked) {

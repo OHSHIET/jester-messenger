@@ -37,7 +37,7 @@ def editAvatar(chatUserObj, avatarObj, isUser):
         os.remove(chatUserPath + previousAvatar[0].group())
     fss.save(avatarPath, avatarObj)
     chatUserObj.avatar.name = avatarPath
-    return avatarPath
+    return 'media/' + avatarPath
 
 def nojs(request):
     return render(request, "messenger/nojs.html")
@@ -150,7 +150,7 @@ def joinchat(request, link):
         chat.save()
         if request.method == 'GET':
             return HttpResponseRedirect(reverse('index'))
-        return JsonResponse({"message": "Successfully joined a chat", "userID": request.user.id, "username": request.user.username, "userAvatar": request.user.avatar.name, "chatInvite": chat.link, "chatID": chat.id, "chatName": chat.name, "chatAvatar": chat.avatar.name, "isError": False, "code": 201}, status=201)
+        return JsonResponse({"message": "Successfully joined a chat", "userID": request.user.id, "username": request.user.username, "userAvatar": request.user.avatar.name, "chatInvite": chat.link, "chatID": chat.id, "chatName": chat.name, "chatAvatar": 'media/' + chat.avatar.name, "isError": False, "code": 201}, status=201)
 
     else:
         return JsonResponse({"message": "PUT or GET request required", "isError": True, "code": 405}, status=405)
@@ -184,13 +184,13 @@ def createchat(request):
         chat = Chat.objects.create(name=name, createdby=request.user)
         avatarPath = getAvatarPath(chat.id, avatar.name, False)
         fss.save(avatarPath, avatar)
-        chat.avatar.name = avatarPath
+        chat.avatar.name = 'media/' + avatarPath
         chat.link = f'{int(str(chat.id) + str(hash(name) % 10000) + str(random.randint(100, 999))):x}'
         chat.users.add(request.user)
         request.user.chats.add(chat)
         chat.save()
         request.user.save()
-        return JsonResponse({"message": "Successfully created new chat", "chatInvite": chat.link, "chatID": chat.id, "chatName": chat.name, "chatAvatar": avatarPath, "isError": False, "code": 201}, status=201)
+        return JsonResponse({"message": "Successfully created new chat", "chatInvite": chat.link, "chatID": chat.id, "chatName": chat.name, "chatAvatar": chat.avatar.name, "isError": False, "code": 201}, status=201)
 
     else:
         return JsonResponse({"message": "POST request required", "isError": True, "code": 405}, status=405)

@@ -8,7 +8,7 @@
             {% for chat in userChats %}
             <div class="chat" data-link="{{chat.link}}">
                 <div class="chat-contents">
-                    <img class="chat-avatar avatar" src="{{ chat.avatar|replaceImgUrl }}" alt="Server avatar" />
+                    <img class="chat-avatar avatar" src="media/{{ chat.avatar }}" alt="Server avatar" />
                     <h2 class="chat-name">{{chat.name}}</h2>
                 </div>
                 {% if request.user == chat.createdby %}

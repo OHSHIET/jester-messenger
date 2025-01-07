@@ -1,9 +1,9 @@
 def init():
     global userAvatarsPath
-    userAvatarsPath = 'messenger/static/messenger/useravatars/'
+    userAvatarsPath = 'media/useravatars/'
 
     global serverAvatarsPath
-    serverAvatarsPath = 'messenger/static/messenger/serveravatars/'
+    serverAvatarsPath = 'media/serveravatars/'
 
     global allowedAvatarExtensions
     allowedAvatarExtensions = ['jpg', 'jpeg', 'png']
