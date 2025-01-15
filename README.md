@@ -8,7 +8,8 @@ It looks like any other online messenger, where you can join chats and talk to p
 #### Video demo: [link](https://www.youtube.com/watch?v=X84m8JKvRjQ)
 
 ### January 2025 update
-* Moved all the avatars to media folder.
+* Hosted the app on Azure's Ubuntu VM with the help of Apache and Daphne. Apache serves static and media files and proxies other requests to Daphne, which serves the backend.
+* Moved all the avatars to media folder, instead of them being in static directory.
 * Fixed the issue with websockets, now it shows the loading screen if there was a disconnection and attempts to reconnect properly.
 
 ## Distinctiveness and complexity

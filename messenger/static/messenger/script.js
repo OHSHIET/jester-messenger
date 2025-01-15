@@ -251,7 +251,6 @@ $(document).ready(function () {
     let keepConnection;
 
     const base_url = `${window.location.hostname}:${window.location.port}`;
-    websocket = new WebSocket(`ws://${base_url}`);
 
     function connectWebSocket() {
         websocket = new WebSocket(`ws://${base_url}`);
